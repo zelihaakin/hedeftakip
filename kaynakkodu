@@ -1,0 +1,120 @@
+import cv2
+import numpy as np
+
+def nothing(x):
+    pass
+
+import RPi.GPIO as GPIO
+import time
+
+import os
+os.system("sudo pigpiod")
+import pigpio
+pi = pigpio.pi()
+p=1750
+r=1000
+y=1000
+pi.set_servo_pulsewidth(4,p)
+time.sleep(1)
+pi.set_servo_pulsewidth(17,y)
+time.sleep(1)
+
+cap = cv2.VideoCapture(0)
+
+while True:
+    _, frame = cap.read()
+    blur = cv2.blur(frame,(7,7))
+    hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+
+ 
+    lower_renk = np.array([2, 170, 71])
+    upper_renk = np.array([12, 255, 200])
+    mask = cv2.inRange(hsv, lower_renk, upper_renk)
+ 
+    result = cv2.bitwise_and(frame, frame, mask=mask)
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
+    center = None
+
+    if len(cnts) > 0:
+        c = max(cnts, key=cv2.contourArea)
+        ((x, y), radius) = cv2.minEnclosingCircle(c)
+        M = cv2.moments(c)
+        if M["m00"] == 0:
+            M["m00"]=1
+        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        if radius > 1:
+            cv2.circle(frame, (int(x), int(y)), int(radius+3),(255, 0, 0), 2)
+            #cv2.circle(frame, center, 3, (0, 0, 255), -1)
+            #cv2.putText(frame,"centroid", (center[0]+10,center[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(0, 0, 255),1)
+            #cv2.putText(frame,"("+str(center[0])+","+str(center[1])+")", (center[0]+10,center[1]+15), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(0, 0, 255),1)
+            
+            
+            h = 320-int(center[0])
+            if h>250:
+                p=p+150
+            elif h>175:
+                p=p+100
+            elif h>80:
+                p=p+30
+            elif h>40:
+                p=p+10 
+            elif h<-250:
+                p=p-150
+            elif h<-175:
+                p=p-100
+            elif h<-80:
+                p=p-30
+            elif h<-40:
+                p=p-10
+
+            if p > 2480:
+                p=2480
+            if p < 520:
+                p=520
+            pi.set_servo_pulsewidth(4, p)
+            #time.sleep(.1)
+            
+            m = 240-int(center[1])
+            
+            if m>200:
+                r=r+80
+            elif m>145:
+                r=r+50
+            elif m>70:
+                r=r+15
+            elif m>60:
+                r=r+8 
+            elif m<-200:
+                r=r-80
+            elif m<-145:
+                r=r-50
+            elif m<-70:
+                r=r-15
+            elif m<-60:
+                r=r-8
+
+            if r > 1700:
+                r=1700
+            if r < 700:
+                r=700
+            
+            pi.set_servo_pulsewidth(17, r)
+            #time.sleep(.1)
+            print(h,p)
+            print(m,y)
+    
+    
+    cv2.imshow('blur', blur)
+    cv2.imshow('mask', mask)
+    cv2.imshow("result", result)
+    cv2.imshow('frame', frame)
+   
+    k = cv2.waitKey(5) & 0xFF
+    if k == 27:
+      break
+
+pi.stop()
+os.system("sudo pkill pigpiod")
+cv2.waitKey(0)
+cap.release()
+cv2.destroyAllWindows ()
