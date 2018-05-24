@@ -4,7 +4,7 @@ Raspberry İle Hedef Takip Sistemi
 
 Projemizin kaynak koduna, ilgili videolarına ve proje raporuna eklerden ulaşabilirsiniz.
 
-Videolara bilgisayarınıza indirerek ulaşabileceğiniz gibi
+Videoları bilgisayarınıza indirerek ulaşabileceğiniz gibi
 
 https://youtu.be/CYvQMX4NHPI
 
