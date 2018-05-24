@@ -14,4 +14,5 @@ https://youtu.be/by2XdHEYlCM
 
 linlerinden de ulaşabilirsiniz.
 
+
 Yunus Emre Özdemir / 170215030 - Zeliha Akın / 170215033
