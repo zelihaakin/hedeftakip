@@ -1,1 +1,2 @@
 # hedeftakip
+adlsşcmf
